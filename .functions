@@ -17,3 +17,8 @@ function o() {
 function cdf() { # short for `cdfinder`
     cd "$(osascript -e 'tell app "Finder" to POSIX path of (insertion location as alias)')";
 }
+
+# Dadjoke
+function dadjoke() {
+    echo -e "$(curl -sH "Accept: text/plain" https://icanhazdadjoke.com/)"
+}
