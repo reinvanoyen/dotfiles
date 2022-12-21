@@ -14,12 +14,12 @@ function installDotfiles() {
 }
 
 if [ "$1" == "--force" -o "$1" == "-f" ]; then
-  doIt;
+  installDotfiles;
 else
   read -p "CAREFUL! This may overwrite existing files in your home directory. Are you sure? (y/n) " -n 1;
   echo "";
   if [[ $REPLY =~ ^[Yy]$ ]]; then
-    doIt;
+    installDotfiles;
   fi;
 fi;
 unset installDotfiles;
