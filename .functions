@@ -22,3 +22,12 @@ function cdf() { # short for `cdfinder`
 function dadjoke() {
     echo -e "$(curl -sH "Accept: text/plain" https://icanhazdadjoke.com/)"
 }
+
+# Workspace
+function ws() {
+    if [ $# -eq 0 ]; then
+        cd ~/Workspace;
+    else
+       cd ~/Workspace/"$@";
+    fi;
+}
