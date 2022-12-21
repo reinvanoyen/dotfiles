@@ -13,13 +13,9 @@ function installDotfiles() {
   source ~/.zshrc;
 }
 
-if [ "$1" == "--force" -o "$1" == "-f" ]; then
+read -p "CAREFUL! This may overwrite existing files in your home directory. Are you sure? (y/n) " -n 1;
+echo "";
+if [[ $REPLY =~ ^[Yy]$ ]]; then
   installDotfiles;
-else
-  read -p "CAREFUL! This may overwrite existing files in your home directory. Are you sure? (y/n) " -n 1;
-  echo "";
-  if [[ $REPLY =~ ^[Yy]$ ]]; then
-    installDotfiles;
-  fi;
 fi;
 unset installDotfiles;
