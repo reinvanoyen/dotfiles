@@ -8,7 +8,7 @@ unset file;
 echo
 echo
 echo
-cat motd
+cat ~/motd
 echo
 echo
 echo
