@@ -3,3 +3,6 @@ alias hs='homestead'
 
 # ls alias
 alias ls='ls -la'
+
+# python3 server alias
+alias serve='python3 -m http.server 9000'
