@@ -1,0 +1,9 @@
+# Google
+function google() {
+    local search
+    search=$1;
+    if [ $# -eq 0 ]; then
+        search=$(pbpaste)
+    fi
+    open "https://www.google.com/search?q=$search"
+}

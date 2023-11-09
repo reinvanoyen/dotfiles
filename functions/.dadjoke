@@ -1,0 +1,4 @@
+# Dadjoke
+function dadjoke() {
+    echo -e "$(curl -sH "Accept: text/plain" https://icanhazdadjoke.com/)"
+}

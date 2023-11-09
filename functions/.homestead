@@ -1,0 +1,4 @@
+# homestead
+function homestead() {
+    ( cd ~/Homestead && vagrant $* )
+}
