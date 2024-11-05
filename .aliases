@@ -9,3 +9,6 @@ alias serve='python3 -m http.server 9000'
 
 # git aliases
 alias gs='git status'
+
+# ls alias
+alias c='clear'
