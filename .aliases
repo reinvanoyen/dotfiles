@@ -12,3 +12,6 @@ alias c='clear'
 
 # musea-cli alias
 alias musea-cli='/Users/rein/Workspace/musea-cli/bin/musea-cli.js'
+
+# platform alias
+alias p='platform'
