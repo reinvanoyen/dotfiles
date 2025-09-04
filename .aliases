@@ -15,3 +15,5 @@ alias musea-cli='/Users/rein/Workspace/musea-cli/bin/musea-cli.js'
 
 # platform alias
 alias p='platform'
+
+alias n='npm'
