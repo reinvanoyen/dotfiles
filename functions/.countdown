@@ -1,0 +1,28 @@
+function countdown() {
+  # === CONFIGURATION ===
+  TARGET_DATE=$(cat ~/countdown)
+
+  # Detect platform and convert to epochy
+  if date --version >/dev/null 2>&1; then
+    # Linux / GNU date
+    TARGET_EPOCH=$(date -d "$TARGET_DATE" +%s)
+  else
+    # macOS / BSD date
+    TARGET_EPOCH=$(date -j -f "%Y-%m-%d %H:%M:%S" "$TARGET_DATE" +%s)
+  fi
+
+  NOW_EPOCH=$(date +%s)
+  REMAINING=$((TARGET_EPOCH - NOW_EPOCH))
+
+  if [ $REMAINING -le 0 ]; then
+    echo "🎉 The time has arrived!"
+    return
+  fi
+
+  DAYS=$((REMAINING / 86400))
+  HOURS=$(( (REMAINING % 86400) / 3600 ))
+  MINUTES=$(( (REMAINING % 3600) / 60 ))
+  SECONDS=$((REMAINING % 60))
+
+  echo "${DAYS}d, ${HOURS}h, ${MINUTES}m, ${SECONDS}s"
+}
