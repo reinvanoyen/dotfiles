@@ -1,8 +1,10 @@
-# ~/.huskyrc
-# This loads nvm.sh and sets the correct PATH before running hook
-# export NVM_DIR="$HOME/.nvm"
-# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-
+# .huskyrc
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-[ -f "$PWD/.nvmrc" ] && nvm use >/dev/null 2>&1 || true
+nvm use --silent >/dev/null 2>&1 || true
+
+# Ensure pnpm/Corepack paths exist
+export PATH="$HOME/Library/pnpm:/opt/homebrew/bin:$PATH"
+
+# Enable Corepack (Node 20+)
+command -v corepack >/dev/null 2>&1 && corepack enable >/dev/null 2>&1 || true
