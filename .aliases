@@ -7,7 +7,7 @@ alias ls='ls -la'
 # git aliases
 alias gs='git status'
 
-# ls alias
+# clear alias
 alias c='clear'
 
 # musea-cli alias
