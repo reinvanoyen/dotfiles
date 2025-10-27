@@ -19,8 +19,6 @@ echo
 cat ~/motd
 echo
 echo
-countdown
-echo
 dadjoke
 echo
 echo
