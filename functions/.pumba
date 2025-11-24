@@ -1,0 +1,4 @@
+# Pumba
+function pumba() {
+	pbcopy < motd
+}
