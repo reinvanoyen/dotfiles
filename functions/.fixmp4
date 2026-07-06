@@ -1,0 +1,16 @@
+function fixmp4() {
+    local input="${1:-damage_file.mp4}"
+    local output="${2:-video_fixed.mp4}"
+
+    ffmpeg \
+        -i "$input" \
+        -vcodec mpeg4 \
+        -b:v 7561k \
+        -qscale:v 2 \
+        -acodec aac \
+        -ac 2 \
+        -async 1 \
+        -strict experimental \
+        -threads 0 \
+        "$output"
+}
