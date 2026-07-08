@@ -22,6 +22,7 @@ function text_on_gif() {
 
   if [ ! -f "$font" ]; then
     for candidate in \
+      "$HOME/fonts/Ubuntu-Medium.ttf" \
       "$HOME/Library/Fonts/Ubuntu-Medium.ttf" \
       "$HOME/Library/Fonts/Ubuntu Medium.ttf" \
       "$HOME/Library/Fonts/Ubuntu-M.ttf" \
