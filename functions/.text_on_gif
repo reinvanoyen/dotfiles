@@ -90,20 +90,21 @@ print(caption)
 PY
   )"
 
-  local fontsize
-  local escaped
-  fontsize="$(printf '%s\n' "$fftext" | sed -n '1p')"
-  escaped="$(printf '%s\n' "$fftext" | sed '1d')"
+    local fontsize
+    local caption
+    fontsize="$(printf '%s\n' "$fftext" | sed -n '1p')"
+    caption="$(printf '%s\n' "$fftext" | sed '1d')"
 
     local caption_file
     caption_file="$(mktemp "/tmp/gifcaption_XXXXXX.txt")"
-    printf '%s' "$escaped" > "$caption_file"
+
+    printf '%s' "$caption" > "$caption_file"
 
     ffmpeg -y -i "$input" \
       -filter_complex "[0:v]drawtext=fontfile='$font':textfile='$caption_file':fontsize=$fontsize:fontcolor=white:line_spacing=6:text_align=center:x=(w-text_w)/2:y=h-text_h-28,split[a][b];[a]palettegen=reserve_transparent=0[p];[b][p]paletteuse=dither=bayer" \
       "$output"
 
-    local status=$?
+    local ffmpeg_result=$?
     rm -f "$caption_file"
-    return $status
+    return $ffmpeg_result
 }
