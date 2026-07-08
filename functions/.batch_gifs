@@ -1,0 +1,53 @@
+function batch_gifs() {
+  local listfile="$1"
+
+  if [ -z "$listfile" ]; then
+    echo "Usage: batch_gifs gifs.txt"
+    return 1
+  fi
+
+  if [ ! -f "$listfile" ]; then
+    echo "File not found: $listfile"
+    return 1
+  fi
+
+  local line_no=0
+
+  while IFS=$'\t' read -r input start_min start_sec end_min end_sec text output || [ -n "$input" ]; do
+    line_no=$((line_no + 1))
+
+    # Skip empty lines and comments
+    [ -z "$input" ] && continue
+    [[ "$input" == \#* ]] && continue
+
+    if [ -z "$input" ] || [ -z "$start_min" ] || [ -z "$start_sec" ] || \
+       [ -z "$end_min" ] || [ -z "$end_sec" ] || [ -z "$text" ] || [ -z "$output" ]; then
+      echo "Skipping line $line_no: missing fields"
+      continue
+    fi
+
+    local temp_gif
+    temp_gif="$(mktemp "/tmp/batchgif_${line_no}_XXXXXX.gif")"
+
+    echo "Creating GIF: $output"
+
+    mp4_to_gif "$input" "$start_min" "$start_sec" "$end_min" "$end_sec" "$temp_gif"
+
+    if [ $? -ne 0 ]; then
+      echo "Failed creating base GIF on line $line_no"
+      rm -f "$temp_gif"
+      continue
+    fi
+
+    text_on_gif "$temp_gif" "$text" "$output"
+
+    if [ $? -ne 0 ]; then
+      echo "Failed adding text on line $line_no"
+      rm -f "$temp_gif"
+      continue
+    fi
+
+    rm -f "$temp_gif"
+    echo "Done: $output"
+  done < "$listfile"
+}
