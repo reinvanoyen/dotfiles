@@ -6,40 +6,43 @@ function batch_gifs() {
     return 1
   fi
 
-  local line_no=0
+  python3 - "$listfile" <<'PY' | while IFS=$'\t' read -r line_no input start_min start_sec end_min end_sec text output; do
+import sys, csv
 
-  while IFS= read -r line || [ -n "$line" ]; do
-    line_no=$((line_no + 1))
+path = sys.argv[1]
 
-    # Remove Windows carriage return
-    line="${line%$'\r'}"
+with open(path, newline="", encoding="utf-8-sig") as f:
+    reader = csv.reader(f, delimiter="\t")
+    for i, row in enumerate(reader, 1):
+        if not row or not row[0].strip() or row[0].strip().startswith("#"):
+            continue
 
-    # Skip empty lines/comments
-    [ -z "$line" ] && continue
-    [[ "$line" == \#* ]] && continue
+        if len(row) < 7:
+            print(f"{i}\tERROR\tmissing fields\t\t\t\t\t")
+            continue
 
-    IFS=$'\t' read -r input start_min start_sec end_min end_sec text output <<< "$line"
+        inputfile, sm, ss, em, es = [x.strip() for x in row[:5]]
+        outputfile = row[-1].strip()
+        text = "\t".join(row[5:-1]).strip()
 
-    if [ -z "$input" ] || [ -z "$start_min" ] || [ -z "$start_sec" ] || \
-       [ -z "$end_min" ] || [ -z "$end_sec" ] || [ -z "$text" ] || [ -z "$output" ]; then
-      echo "Skipping line $line_no: missing fields"
-      echo "$line"
+        print("\t".join([str(i), inputfile, sm, ss, em, es, text, outputfile]))
+PY
+
+    if [ "$input" = "ERROR" ]; then
+      echo "Skipping line $line_no: $start_min"
       continue
     fi
 
     if [ ! -f "$input" ]; then
-      echo "Skipping line $line_no: input file not found: $input"
+      echo "Skipping line $line_no: input file not found: '$input'"
       continue
     fi
 
     local temp_gif
     temp_gif="$(mktemp "/tmp/batchgif_${line_no}_XXXXXX.gif")"
 
-    echo "Line $line_no:"
-    echo "  input:  $input"
-    echo "  time:   $start_min:$start_sec -> $end_min:$end_sec"
-    echo "  text:   $text"
-    echo "  output: $output"
+    echo "Line $line_no: $input -> $output"
+    echo "Text: $text"
 
     mp4_to_gif "$input" "$start_min" "$start_sec" "$end_min" "$end_sec" "$temp_gif" || {
       echo "Failed creating base GIF on line $line_no"
@@ -55,5 +58,5 @@ function batch_gifs() {
 
     rm -f "$temp_gif"
     echo "Done: $output"
-  done < "$listfile"
+  done
 }
