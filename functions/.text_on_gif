@@ -1,11 +1,11 @@
-function giftext() {
+function text_on_gif() {
   local input="$1"
   local text="$2"
   local output="${3:-output.gif}"
   local font="${FONT:-/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf}"
 
   if [ -z "$input" ] || [ -z "$text" ]; then
-    echo "Usage: giftext input.gif \"caption text\" [output.gif]"
+    echo "Usage: text_on_gif input.gif \"caption text\" [output.gif]"
     return 1
   fi
 
