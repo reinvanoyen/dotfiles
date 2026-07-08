@@ -1,0 +1,74 @@
+function giftext() {
+  local input="$1"
+  local text="$2"
+  local output="${3:-output.gif}"
+  local font="${FONT:-/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf}"
+
+  if [ -z "$input" ] || [ -z "$text" ]; then
+    echo "Usage: giftext input.gif \"caption text\" [output.gif]"
+    return 1
+  fi
+
+  local len=${#text}
+  local fontsize
+
+  if [ "$len" -le 12 ]; then
+    fontsize=44
+  elif [ "$len" -le 28 ]; then
+    fontsize=38
+  elif [ "$len" -le 55 ]; then
+    fontsize=32
+  else
+    fontsize=28
+  fi
+
+  local wrapped
+  wrapped="$(
+    TEXT="$text" python3 - <<'PY'
+import os, textwrap
+text = os.environ["TEXT"].strip()
+
+# Aim for two balanced lines
+if len(text) <= 28:
+    print(text)
+else:
+    width = max(18, min(34, len(text)//2))
+    lines = textwrap.wrap(text, width=width)
+
+    if len(lines) > 2:
+        mid = len(text) // 2
+        split = text.rfind(" ", 0, mid)
+        if split == -1:
+            split = text.find(" ", mid)
+        if split != -1:
+            lines = [text[:split].strip(), text[split:].strip()]
+        else:
+            lines = [text]
+
+    print("\\n".join(lines[:2]))
+PY
+  )"
+
+  local escaped
+  escaped=$(printf '%s' "$wrapped" \
+    | sed "s/'/'\\\\\\\\''/g; s/:/\\\\:/g; s/%/\\\\%/g")
+
+  ffmpeg -y -i "$input" \
+    -filter_complex "
+      [0:v]
+      drawtext=
+        fontfile='$font':
+        text='$escaped':
+        fontsize=$fontsize:
+        fontcolor=white:
+        borderw=2:
+        bordercolor=black:
+        line_spacing=6:
+        x=(w-text_w)/2:
+        y=h-text_h-28,
+      split[a][b];
+      [a]palettegen=reserve_transparent=0[p];
+      [b][p]paletteuse=dither=bayer
+    " \
+    "$output"
+}
