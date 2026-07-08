@@ -54,19 +54,19 @@ text = os.environ["TEXT"].strip()
 length = len(text)
 
 if length <= 10:
-    size = 52
+    size = 68
     width = 1000
 elif length <= 18:
-    size = 46
+    size = 62
     width = 1000
 elif length <= 32:
-    size = 40
-    width = 28
+    size = 56
+    width = 26
 elif length <= 55:
-    size = 34
+    size = 48
     width = 28
 else:
-    size = 30
+    size = 42
     width = 32
 
 if length <= 32:
