@@ -6,72 +6,47 @@ function batch_gifs() {
     return 1
   fi
 
-  python3 - "$listfile" <<'PY' | while IFS= read -r cmd; do
-import sys, csv, shlex
+  local line_no=0
 
-with open(sys.argv[1], newline="", encoding="utf-8-sig") as f:
-    reader = csv.reader(f, delimiter="\t")
+  while IFS=$'\t' read -r input start_min start_sec end_min end_sec text output <&3 || [ -n "$input" ]; do
+    line_no=$((line_no + 1))
 
-    for line_no, row in enumerate(reader, 1):
-        if not row or not row[0].strip() or row[0].strip().startswith("#"):
-            continue
+    input="${input%$'\r'}"
+    output="${output%$'\r'}"
 
-        if len(row) != 7:
-            print("echo " + shlex.quote(f"Skipping line {line_no}: expected 7 tab-separated fields, got {len(row)}"))
-            continue
+    [ -z "$input" ] && continue
+    [[ "$input" == \#* ]] && continue
 
-        inputfile, sm, ss, em, es, text, outputfile = [x.strip() for x in row]
+    if [ -z "$input" ] || [ -z "$start_min" ] || [ -z "$start_sec" ] || \
+       [ -z "$end_min" ] || [ -z "$end_sec" ] || [ -z "$text" ] || [ -z "$output" ]; then
+      echo "Skipping line $line_no: missing fields"
+      continue
+    fi
 
-        print(
-            "__line_no={line_no}; "
-            "__input={inputfile}; "
-            "__sm={sm}; "
-            "__ss={ss}; "
-            "__em={em}; "
-            "__es={es}; "
-            "__text={text}; "
-            "__output={outputfile}; "
-            "batch_gifs_run_one"
-            .format(
-                line_no=shlex.quote(str(line_no)),
-                inputfile=shlex.quote(inputfile),
-                sm=shlex.quote(sm),
-                ss=shlex.quote(ss),
-                em=shlex.quote(em),
-                es=shlex.quote(es),
-                text=shlex.quote(text),
-                outputfile=shlex.quote(outputfile),
-            )
-        )
-PY
-    eval "$cmd"
-  done
-}
+    if [ ! -f "$input" ]; then
+      echo "Skipping line $line_no: input file not found: '$input'"
+      continue
+    fi
 
-function batch_gifs_run_one() {
-  if [ ! -f "$__input" ]; then
-    echo "Skipping line $__line_no: input file not found: '$__input'"
-    return 0
-  fi
+    local temp_gif
+    temp_gif="$(mktemp "/tmp/batchgif_${line_no}_XXXXXX.gif")"
 
-  local temp_gif
-  temp_gif="$(mktemp "/tmp/batchgif_${__line_no}_XXXXXX.gif")"
+    echo "Line $line_no: $input -> $output"
+    echo "Text: $text"
 
-  echo "Line $__line_no: $__input -> $__output"
-  echo "Text: $__text"
+    mp4_to_gif "$input" "$start_min" "$start_sec" "$end_min" "$end_sec" "$temp_gif" </dev/null || {
+      echo "Failed creating base GIF on line $line_no"
+      rm -f "$temp_gif"
+      continue
+    }
 
-  mp4_to_gif "$__input" "$__sm" "$__ss" "$__em" "$__es" "$temp_gif" || {
-    echo "Failed creating base GIF on line $__line_no"
+    text_on_gif "$temp_gif" "$text" "$output" </dev/null || {
+      echo "Failed adding text on line $line_no"
+      rm -f "$temp_gif"
+      continue
+    }
+
     rm -f "$temp_gif"
-    return 0
-  }
-
-  text_on_gif "$temp_gif" "$__text" "$__output" || {
-    echo "Failed adding text on line $__line_no"
-    rm -f "$temp_gif"
-    return 0
-  }
-
-  rm -f "$temp_gif"
-  echo "Done: $__output"
+    echo "Done: $output"
+  done 3< "$listfile"
 }
