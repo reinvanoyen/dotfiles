@@ -8,18 +8,34 @@ function batch_gifs() {
 
   local line_no=0
 
-  while IFS=$'\t' read -r input start_min start_sec end_min end_sec text output <&3 || [ -n "$input" ]; do
+  while IFS= read -r line || [ -n "$line" ]; do
     line_no=$((line_no + 1))
+    line="${line%$'\r'}"
 
-    input="${input%$'\r'}"
-    output="${output%$'\r'}"
+    [ -z "$line" ] && continue
+    [[ "$line" == \#* ]] && continue
 
-    [ -z "$input" ] && continue
-    [[ "$input" == \#* ]] && continue
+    local input start_min start_sec end_min end_sec text output
+
+    input="$(printf '%s' "$line" | cut -f1)"
+    start_min="$(printf '%s' "$line" | cut -f2)"
+    start_sec="$(printf '%s' "$line" | cut -f3)"
+    end_min="$(printf '%s' "$line" | cut -f4)"
+    end_sec="$(printf '%s' "$line" | cut -f5)"
+    text="$(printf '%s' "$line" | cut -f6)"
+    output="$(printf '%s' "$line" | cut -f7)"
 
     if [ -z "$input" ] || [ -z "$start_min" ] || [ -z "$start_sec" ] || \
        [ -z "$end_min" ] || [ -z "$end_sec" ] || [ -z "$text" ] || [ -z "$output" ]; then
       echo "Skipping line $line_no: missing fields"
+      echo "Parsed:"
+      echo "input='$input'"
+      echo "start_min='$start_min'"
+      echo "start_sec='$start_sec'"
+      echo "end_min='$end_min'"
+      echo "end_sec='$end_sec'"
+      echo "text='$text'"
+      echo "output='$output'"
       continue
     fi
 
@@ -48,5 +64,5 @@ function batch_gifs() {
 
     rm -f "$temp_gif"
     echo "Done: $output"
-  done 3< "$listfile"
+  done < "$listfile"
 }
