@@ -101,6 +101,6 @@ PY
   escaped="$(printf '%s\n' "$fftext" | sed '1d')"
 
   ffmpeg -y -i "$input" \
-    -filter_complex "[0:v]drawtext=fontfile='$font':text='$escaped':fontsize=$fontsize:fontcolor=white:borderw=2:bordercolor=black:line_spacing=6:x=(w-text_w)/2:y=h-text_h-28,split[a][b];[a]palettegen=reserve_transparent=0[p];[b][p]paletteuse=dither=bayer" \
+    -filter_complex "[0:v]drawtext=fontfile='$font':text='$escaped':fontsize=$fontsize:fontcolor=white:line_spacing=6:x=(w-text_w)/2:y=h-text_h-28,split[a][b];[a]palettegen=reserve_transparent=0[p];[b][p]paletteuse=dither=bayer" \
     "$output"
 }
