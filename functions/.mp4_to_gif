@@ -30,7 +30,7 @@ function mp4_to_gif() {
         -ss "$start_time" \
         -t "$duration" \
         -i "$input" \
-        -vf "fps=15,scale=800:-1:flags=lanczos,palettegen" \
+        -vf "fps=15,scale=400:-1:flags=lanczos,palettegen" \
         "$palette"
 
     ffmpeg -y \
@@ -38,7 +38,7 @@ function mp4_to_gif() {
         -t "$duration" \
         -i "$input" \
         -i "$palette" \
-        -lavfi "fps=15,scale=800:-1:flags=lanczos[x];[x][1:v]paletteuse" \
+        -lavfi "fps=15,scale=400:-1:flags=lanczos[x];[x][1:v]paletteuse" \
         "$output"
 
     rm -f "$palette"
