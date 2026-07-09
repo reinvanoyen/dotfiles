@@ -38,8 +38,7 @@ function text_on_gif() {
 
   if [ ! -f "$font" ]; then
     echo "Font not found."
-    echo "Set it like this:"
-    echo 'FONT="$HOME/Library/Fonts/Ubuntu-Medium.ttf" text_on_gif input.gif "text" output.gif'
+    echo 'Set FONT="$HOME/Library/Fonts/Ubuntu-Medium.ttf"'
     return 1
   fi
 
@@ -53,33 +52,39 @@ import os, textwrap
 text = os.environ["TEXT"].strip()
 length = len(text)
 
+# Tuned for 400 px wide GIFs
 if length <= 10:
-    size = 68
+    size = 36
     width = 1000
 elif length <= 18:
-    size = 62
+    size = 34
     width = 1000
 elif length <= 32:
-    size = 56
-    width = 26
+    size = 30
+    width = 18
 elif length <= 55:
-    size = 48
-    width = 28
+    size = 26
+    width = 20
 else:
-    size = 42
-    width = 32
+    size = 22
+    width = 22
 
 if length <= 32:
     lines = [text]
 else:
     lines = textwrap.wrap(text, width=width)
+
     if len(lines) > 2:
         mid = len(text) // 2
         split = text.rfind(" ", 0, mid)
         if split == -1:
             split = text.find(" ", mid)
+
         if split != -1:
-            lines = [text[:split].strip(), text[split:].strip()]
+            lines = [
+                text[:split].strip(),
+                text[split:].strip()
+            ]
         else:
             lines = [text]
 
@@ -90,26 +95,26 @@ print(caption)
 PY
   )"
 
-    local fontsize
-    local caption
-    fontsize="$(printf '%s\n' "$fftext" | sed -n '1p')"
-    caption="$(printf '%s\n' "$fftext" | sed '1d')"
+  local fontsize
+  local caption
+  fontsize="$(printf '%s\n' "$fftext" | sed -n '1p')"
+  caption="$(printf '%s\n' "$fftext" | sed '1d')"
 
-    local caption_file
-    caption_file="$(mktemp -t gifcaption)"
+  local caption_file
+  caption_file="$(mktemp -t gifcaption)"
 
-    if [ -z "$caption_file" ]; then
-      echo "Could not create temporary caption file"
-      return 1
-    fi
+  if [ -z "$caption_file" ]; then
+    echo "Could not create temporary caption file"
+    return 1
+  fi
 
-    printf '%s' "$caption" > "$caption_file"
+  printf '%s' "$caption" > "$caption_file"
 
-    ffmpeg -y -i "$input" \
-      -filter_complex "[0:v]drawtext=fontfile='$font':textfile=$caption_file:fontsize=$fontsize:fontcolor=white:line_spacing=6:text_align=center:x=(w-text_w)/2:y=h-text_h-28,split[a][b];[a]palettegen=reserve_transparent=0[p];[b][p]paletteuse=dither=bayer" \
-      "$output"
+  ffmpeg -y -i "$input" \
+    -filter_complex "[0:v]drawtext=fontfile='$font':textfile=$caption_file:fontsize=$fontsize:fontcolor=white:line_spacing=4:text_align=center:x=(w-text_w)/2:y=h-text_h-16,split[a][b];[a]palettegen=reserve_transparent=0[p];[b][p]paletteuse=dither=bayer" \
+    "$output"
 
-    local ffmpeg_result=$?
-    rm -f "$caption_file"
-    return $ffmpeg_result
+  local ffmpeg_result=$?
+  rm -f "$caption_file"
+  return $ffmpeg_result
 }
