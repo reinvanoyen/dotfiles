@@ -1,0 +1,10 @@
+function txtwatch() {
+    local file="$1"
+    local interval="${2:-1}"
+
+    while true; do
+        clear
+        cat "$file"
+        sleep "$interval"
+    done
+}
